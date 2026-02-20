@@ -12,8 +12,4 @@ else
   echo "No Docker containers found."
 fi
 
-echo "Cleaning up application directory..."
-cd /home/ubuntu || true
-rm -rf ae-manage || true
 
-echo "Stop and cleanup completed."
