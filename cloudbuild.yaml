@@ -1,15 +1,5 @@
 steps:
-  # Step 1: SSH into VM and stop any running app
-  - name: gcr.io/cloud-builders/gcloud
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        gcloud compute ssh ubuntu@tj-test \
-          --zone=asia-south1-c \
-          --command="bash ~/cloudbuild/stop.sh"
-
-  # Step 2: SSH into VM and clone/update repo
+  # Step 1: Clone or update repo on VM
   - name: gcr.io/cloud-builders/gcloud
     entrypoint: bash
     args:
@@ -18,14 +8,14 @@ steps:
         gcloud compute ssh ubuntu@tj-test \
           --zone=asia-south1-c \
           --command="
-            if [ ! -d ~/ae-manage ]; then
-              git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git ~/ae-manage
+            if [ ! -d /home/ubuntu/ae-manage ]; then
+              git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
             else
-              cd ~/ae-manage && git pull
+              cd /home/ubuntu/ae-manage && git pull
             fi
           "
 
-  # Step 3: SSH into VM and run component scripts
+  # Step 2: Run stop.sh
   - name: gcr.io/cloud-builders/gcloud
     entrypoint: bash
     args:
@@ -33,9 +23,12 @@ steps:
       - |
         gcloud compute ssh ubuntu@tj-test \
           --zone=asia-south1-c \
-          --command="bash ~/ae-manage/cloudbuild/component.sh"
+          --command="
+            chmod +x /home/ubuntu/ae-manage/cloudbuild/*.sh &&
+            bash /home/ubuntu/ae-manage/cloudbuild/stop.sh
+          "
 
-  # Step 4: SSH into VM and start the app
+  # Step 3: Run clean.sh
   - name: gcr.io/cloud-builders/gcloud
     entrypoint: bash
     args:
@@ -43,7 +36,17 @@ steps:
       - |
         gcloud compute ssh ubuntu@tj-test \
           --zone=asia-south1-c \
-          --command="bash ~/ae-manage/cloudbuild/app_start.sh"
+          --command="bash /home/ubuntu/ae-manage/cloudbuild/clean.sh"
+
+  # Step 4: Run app_start.sh
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud compute ssh ubuntu@tj-test \
+          --zone=asia-south1-c \
+          --command="bash /home/ubuntu/ae-manage/cloudbuild/app_start.sh"
 
 timeout: 1200s
 
