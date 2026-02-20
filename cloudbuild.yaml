@@ -23,6 +23,8 @@ steps:
             bash app_stop.sh || true
             echo 'Running before_install'
             bash before_install.sh
+            
+            cd /home/ubuntu
             echo 'Cloning  again repo'
             git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
 
