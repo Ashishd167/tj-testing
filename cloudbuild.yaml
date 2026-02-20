@@ -1,42 +1,49 @@
 steps:
-# Step 1: SSH into VM and stop running containers
-- name: gcr.io/cloud-builders/gcloud
-  entrypoint: bash
-  args:
-    - -c
-    - |
-      gcloud compute ssh ubuntu@tj-test \
-        --zone=asia-south1-c \
-        --command="bash /home/ubuntu/stop.sh"
+  # Step 1: SSH into VM and clone/update repo
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud compute ssh ubuntu@tj-test \
+          --zone=asia-south1-c \
+          --command="
+            if [ ! -d ~/ae-manage ]; then
+              git clone https://github.com/Ashishd167/tj-testing.git ~/ae-manage
+            else
+              cd ~/ae-manage && git pull
+            fi
+          "
 
-# Step 2: Clean old app directory
-- name: gcr.io/cloud-builders/gcloud
-  entrypoint: bash
-  args:
-    - -c
-    - |
-      gcloud compute ssh ubuntu@tj-test \
-        --zone=asia-south1-c \
-        --command="bash /home/ubuntu/cleanup.sh"
+  # Step 2: SSH into VM and stop any running app (from repo)
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud compute ssh ubuntu@tj-test \
+          --zone=asia-south1-c \
+          --command="bash ~/ae-manage/codebuild/stop.sh"
 
-# Step 3: Copy new code to VM
-- name: gcr.io/cloud-builders/gcloud
-  entrypoint: bash
-  args:
-    - -c
-    - |
-      gcloud compute scp --recurse . ubuntu@tj-test:/home/ubuntu/ae-manage \
-        --zone=asia-south1-c
+  # Step 3: SSH into VM and clean old app/data (from repo)
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud compute ssh ubuntu@tj-test \
+          --zone=asia-south1-c \
+          --command="bash ~/ae-manage/codebuild/clean.sh"
 
-# Step 4: Start app (pull config + docker-compose up)
-- name: gcr.io/cloud-builders/gcloud
-  entrypoint: bash
-  args:
-    - -c
-    - |
-      gcloud compute ssh ubuntu@tj-test \
-        --zone=asia-south1-c \
-        --command="bash /home/ubuntu/ae-manage/app_start.sh"
+  # Step 4: SSH into VM and start the app (from repo)
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud compute ssh ubuntu@tj-test \
+          --zone=asia-south1-c \
+          --command="bash ~/ae-manage/codebuild/app_start.sh"
 
 timeout: 1200s
 
