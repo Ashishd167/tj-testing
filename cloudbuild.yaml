@@ -1,54 +1,30 @@
 steps:
-  # Step 1: Clone or update repo on VM
-  - name: gcr.io/cloud-builders/gcloud
+  - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: bash
     args:
       - -c
       - |
+        echo "Deploying to VM tj-test..."
+
         gcloud compute ssh ubuntu@tj-test \
           --zone=asia-south1-c \
           --command="
-            if [ ! -d /home/ubuntu/ae-manage ]; then
-              git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
-            else
-              cd /home/ubuntu/ae-manage && git pull
-            fi
+            set -e
+
+            echo 'Cleaning old app directory'
+            rm -rf /home/ubuntu/ae-manage
+
+            echo 'Cloning repo'
+            git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
+
+            cd /home/ubuntu/ae-manage/build/codedeploy
+
+            echo 'Running before_install'
+            bash before_install.sh
+
+            echo 'Stopping existing app'
+            bash app_stop.sh || true
+
+            echo 'Starting app'
+            bash app_start.sh
           "
-
-  # Step 2: Run stop.sh
-  - name: gcr.io/cloud-builders/gcloud
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        gcloud compute ssh ubuntu@tj-test \
-          --zone=asia-south1-c \
-          --command="
-            chmod +x /home/ubuntu/ae-manage/cloudbuild/*.sh &&
-            bash /home/ubuntu/ae-manage/cloudbuild/stop.sh
-          "
-
-  # Step 3: Run clean.sh
-  - name: gcr.io/cloud-builders/gcloud
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        gcloud compute ssh ubuntu@tj-test \
-          --zone=asia-south1-c \
-          --command="bash /home/ubuntu/ae-manage/cloudbuild/clean.sh"
-
-  # Step 4: Run app_start.sh
-  - name: gcr.io/cloud-builders/gcloud
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        gcloud compute ssh ubuntu@tj-test \
-          --zone=asia-south1-c \
-          --command="bash /home/ubuntu/ae-manage/cloudbuild/app_start.sh"
-
-timeout: 1200s
-
-options:
-  logging: CLOUD_LOGGING_ONLY

@@ -1,6 +1,10 @@
-cd /home/ubuntu/ae-manage
+#!/bin/bash
+set -e
+
+cd /home/ubuntu/ae-manage || exit 1
+
+echo "Downloading env file from GCS..."
 gsutil cp gs://tj-testing-bucket/config.manage-ae.env config.env
 
-sudo docker build -t hello .
-sudo docker run hello
-
+echo "Starting application..."
+docker compose up --build -d

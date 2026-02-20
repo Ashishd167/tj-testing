@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  hello:
+    image: nginx:alpine
+    container_name: hello-world-app
+    ports:
+      - "8080:80"
+    restart: always
