@@ -7,4 +7,5 @@ echo "Downloading env file from GCS..."
 gsutil cp gs://tj-testing-bucket/config.manage-ae.env config.env
 
 echo "Starting application..."
-docker compose up --build -d
+sudo chmod 777 /var/run/docker.sock
+sudo docker compose up --build -d
