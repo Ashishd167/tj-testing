@@ -17,7 +17,7 @@ steps:
             echo 'Cloning repo'
             git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
 
-            cd /home/ubuntu/ae-manage/build/codedeploy
+            cd /home/ubuntu/ae-manage/cloudbuild
 
             echo 'Running before_install'
             bash before_install.sh
