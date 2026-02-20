@@ -27,7 +27,7 @@ steps:
             cd /home/ubuntu
             echo 'Cloning  again repo'
             git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
-
+            cd /home/ubuntu/ae-manage/cloudbuild
             echo 'Starting app'
             bash app_start.sh
           "
