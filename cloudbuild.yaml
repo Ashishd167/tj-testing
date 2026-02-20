@@ -19,11 +19,12 @@ steps:
 
             cd /home/ubuntu/ae-manage/cloudbuild
 
-            echo 'Running before_install'
-            bash before_install.sh
-
             echo 'Stopping existing app'
             bash app_stop.sh || true
+            echo 'Running before_install'
+            bash before_install.sh
+            echo 'Cloning  again repo'
+            git clone https://github.com/Ashishd167/tj-testing.git /home/ubuntu/ae-manage
 
             echo 'Starting app'
             bash app_start.sh
